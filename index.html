@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sense FF</title>
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; background:#0f172a; color:#e5e7eb; }
+    header { padding:40px 20px; text-align:center; background:linear-gradient(135deg,#2563eb,#22c55e); }
+    header h1 { font-size:2.5rem; margin-bottom:10px; }
+    header p { font-size:1.1rem; }
+    section { max-width:1000px; margin:40px auto; padding:0 20px; }
+    .card { background:#020617; border-radius:12px; padding:24px; margin-bottom:20px; box-shadow:0 10px 30px rgba(0,0,0,0.4); }
+    .card h2 { margin-top:0; color:#38bdf8; }
+    footer { text-align:center; padding:20px; background:#020617; color:#9ca3af; }
+  </style>
+</head>
+<body>
+
+<!-- BLOQUEIO POR SENHA -->
+<div id="lock" style="position:fixed;inset:0;background:#020617;display:flex;align-items:center;justify-content:center;z-index:9999;">
+  <div style="background:#0f172a;padding:30px;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,.6);text-align:center;max-width:320px;width:100%;">
+    <h2 style="margin-top:0;color:#38bdf8;">🔒 Acesso Protegido</h2>
+    <p>Digite a senha para entrar no <b>Sense FF</b></p>
+    <input id="pwd" type="password" placeholder="Senha" oninput="autoLogin()" style="width:100%;padding:12px;border-radius:10px;border:none;margin:12px 0;" />
+    <p id="err" style="color:#ef4444;display:none;margin-top:10px;">Senha incorreta</p>
+  </div>
+</div>
+
+<header>
+  <h1>Sense FF</h1>
+  <p>Ajustes profissionais para melhorar sua mira e consistência 🎯</p>
+</header>
+
+<section>
+  <!-- PAINEL ADMIN -->
+  <div class="card" id="adminPanel" style="display:none;border:2px solid #22c55e;">
+    <h2>🛡️ Painel Admin</h2>
+    <p>Área exclusiva do administrador do <b>Sense FF</b></p>
+    <button id="btnLogout" style="padding:10px 16px;border-radius:10px;border:none;background:#ef4444;color:white;font-weight:bold;cursor:pointer;">Sair (Logout)</button>
+    <hr style="margin:20px 0;border-color:#1f2937;" />
+    <p><b>Status:</b> Admin autenticado ✅</p>
+  </div>
+
+  <div class="card">
+    <h2>📱 Sensibilidade por Modelo de Celular</h2>
+    <p>Escolha a marca e o modelo para gerar <b>até 10 sensibilidades</b>.</p>
+
+    <select id="brand" style="padding:10px;border-radius:10px;border:none;margin:10px 0;width:100%;max-width:360px;">
+      <option value="">Selecione a marca</option>
+      <option value="Samsung">Samsung</option>
+      <option value="Xiaomi">Xiaomi</option>
+      <option value="Motorola">Motorola</option>
+      <option value="iPhone">iPhone</option>
+      <option value="Realme">Realme</option>
+    </select>
+
+    <select id="model" style="padding:10px;border-radius:10px;border:none;margin:10px 0;width:100%;max-width:360px;">
+      <option value="">Selecione o modelo</option>
+    </select>
+
+    <button id="btnGen" style="padding:10px 16px;border-radius:10px;border:none;background:#38bdf8;color:#020617;font-weight:bold;cursor:pointer;">Gerar Sensibilidades</button>
+
+    <div id="list" style="margin-top:16px;max-height:400px;overflow:auto;"></div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 • Sense FF • Conteúdo educativo</p>
+</footer>
+
+<script>
+  // ===== SENHA =====
+  const PASSWORD = "senseff";
+
+  // Login automático (SIMPLES e SEM ERRO)
+  function autoLogin() {
+    const v = document.getElementById('pwd').value;
+    const err = document.getElementById('err');
+
+    if (v === PASSWORD) {
+      document.getElementById('lock').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      err.style.display = 'none';
+    } else {
+      err.style.display = v.length > 0 ? 'block' : 'none';
+    }
+  }
+
+  // ===== MODELOS =====
+  const models = {
+    Samsung: ["A10","A20","A30","A50","A51","A71","S9","S10","S20","S21"],
+    Xiaomi: ["Redmi 8","Redmi 9","Redmi 10","Note 8","Note 9","Note 10","Poco X3","Poco X5"],
+    Motorola: ["G7","G8","G9","G10","G20","G30","G50"],
+    iPhone: ["7","8","X","XR","11","12","13","14"],
+    Realme: ["C11","C25","C35","8","9","10","GT"]
+  };
+
+  const baseSense = { g:120, r:115, m2:100, m4:90, awm:75, ol:95 };
+
+  function loadModels() {
+    const brand = document.getElementById('brand').value;
+    const modelSelect = document.getElementById('model');
+    modelSelect.innerHTML = '<option value="">Selecione o modelo</option>';
+    if (!brand) return;
+
+    models[brand].forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      modelSelect.appendChild(opt);
+    });
+  }
+
+  function genSense() {
+    const brand = document.getElementById('brand').value;
+    const model = document.getElementById('model').value;
+    if (!brand || !model) {
+      alert('Selecione a marca e o modelo');
+      return;
+    }
+
+    let html = `<h3>${brand} ${model}</h3>`;
+
+    for (let i = 1; i <= 10; i++) {
+      const mult = 0.85 + (i * 0.03);
+      const f = v => Math.max(0, Math.min(200, Math.round(v * mult)));
+
+      html += `
+      <div style="margin-top:14px;padding:14px;border-radius:12px;background:#020617;border:1px solid #1f2937;">
+        <h4>${i}. 🎯 Sensibilidade ${i}</h4>
+        🎯 Geral: <b>${f(baseSense.g)}</b><br/>
+        🔴 Red Dot: <b>${f(baseSense.r)}</b><br/>
+        🔍 Mira 2x: <b>${f(baseSense.m2)}</b><br/>
+        🔎 Mira 4x: <b>${f(baseSense.m4)}</b><br/>
+        🎯 AWM: <b>${f(baseSense.awm)}</b><br/>
+        👁️ Olhadinha: <b>${f(baseSense.ol)}</b>
+      </div>`;
+    }
+
+    document.getElementById('list').innerHTML = html;
+  }
+
+  // ===== EVENTOS =====
+  document.getElementById('brand').addEventListener('change', loadModels);
+  document.getElementById('btnGen').addEventListener('click', genSense);
+  document.getElementById('btnLogout').addEventListener('click', () => location.reload());
+</script>
+
+</body>
+</html>
